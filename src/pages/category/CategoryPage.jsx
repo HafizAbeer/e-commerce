@@ -76,14 +76,16 @@ const CategoryPage = () => {
                               {cartItems.some((p) => p.id === item.id) ? (
                                 <button
                                   onClick={() => deleteCart(item)}
-                                  className=" bg-red-700 hover:bg-pink-600 w-full text-white py-[4px] rounded-lg font-bold"
+                                  style={{ backgroundColor: "#020617" }}
+                                  className=" w-full text-white py-[4px] rounded-lg font-bold"
                                 >
                                   Remove from Cart
                                 </button>
                               ) : (
                                 <button
                                   onClick={() => addCart(item)}
-                                  className=" bg-pink-500 hover:bg-pink-600 w-full text-white py-[4px] rounded-lg font-bold"
+                                  style={{ backgroundColor: "#020617" }}
+                                  className="  w-full text-white py-[4px] rounded-lg font-bold"
                                 >
                                   Add to Cart
                                 </button>
