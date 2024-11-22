@@ -18,6 +18,11 @@ import { ProtectedRouteForUser } from "./protectedRoute/ProtectedRouteForUser";
 import { ProtectedRouteForAdmin } from "./protectedRoute/ProtectedRouteForAdmin";
 import CategoryPage from "./pages/category/CategoryPage";
 import Layout from "./components/layout/Layout";
+import ContactUs from "./components/contactUs/ContactUs";
+
+// Import Header and Footer
+import Header from "./components/navbar/Navbar";
+import Footer from "./components/footer/Footer";
 
 const App = () => {
   return (
@@ -25,6 +30,7 @@ const App = () => {
       <Router>
         <ScrollTop />
         <Routes>
+          {/* Home, Product Info, and other pages */}
           <Route path="/" element={<HomePage />} />
           <Route path="/*" element={<NoPage />} />
           <Route path="/productinfo/:id" element={<ProductInfo />} />
@@ -33,6 +39,20 @@ const App = () => {
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
           <Route path="/category/:categoryname" element={<CategoryPage />} />
+
+          {/* Contact Us page with Header and Footer */}
+          <Route
+            path="/contactus"
+            element={
+              <>
+                <Header /> {/* Include Header here */}
+                <ContactUs /> {/* Contact Us page */}
+                <Footer /> {/* Include Footer here */}
+              </>
+            }
+          />
+
+          {/* Protected Routes for User and Admin */}
           <Route
             path="user-dashboard"
             element={

@@ -72,6 +72,9 @@ const Navbar = () => {
       <li>
         <Link to={"/cart"}>Cart({cartItems.length})</Link>
       </li>
+      <li>
+        <Link to={"/contactus"}>Contact Us</Link>
+      </li>
     </ul>
   );
   return (
