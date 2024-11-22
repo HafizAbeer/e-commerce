@@ -17,6 +17,7 @@ import { Toaster } from "react-hot-toast";
 import { ProtectedRouteForUser } from "./protectedRoute/ProtectedRouteForUser";
 import { ProtectedRouteForAdmin } from "./protectedRoute/ProtectedRouteForAdmin";
 import CategoryPage from "./pages/category/CategoryPage";
+import Layout from "./components/layout/Layout";
 
 const App = () => {
   return (
@@ -44,7 +45,9 @@ const App = () => {
             path="/admin-dashboard"
             element={
               <ProtectedRouteForAdmin>
-                <AdminDashboard />
+                <Layout>
+                  <AdminDashboard />
+                </Layout>
               </ProtectedRouteForAdmin>
             }
           />
