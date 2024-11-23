@@ -4,7 +4,10 @@ import { HomeOutlined } from "@ant-design/icons";
 
 const NotFound = () => {
   return (
-    <div style={{ backgroundColor: "#1e293b" }} className="flex flex-col justify-center items-center h-screen text-center text-white p-5">
+    <div
+      style={{ backgroundColor: "#1e293b" }}
+      className="flex flex-col justify-center items-center h-screen text-center text-white p-5"
+    >
       <div className="max-w-[600px] w-full">
         <h1 className="text-[10rem] font-extrabold m-0">404</h1>
         <h2 className="text-4xl my-5">Oops! Page Not Found</h2>

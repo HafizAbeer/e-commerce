@@ -204,7 +204,7 @@ const CartPage = () => {
                     })}
                   </>
                 ) : (
-                  <h1>Not Found</h1>
+                  <h1>Cart is empty</h1>
                 )}
               </ul>
             </section>
