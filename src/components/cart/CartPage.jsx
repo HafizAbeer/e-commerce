@@ -5,13 +5,15 @@ import {
   decrementQuantity,
   deleteFromCart,
   incrementQuantity,
+  clearCart,
 } from "../../redux/cartSlice";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { addDoc, collection, Timestamp } from "firebase/firestore";
 import BuyNowModal from "../buyNowModal/BuyNowModal";
 import { fireDB } from "../../firebase/FirebaseConfig";
-import { Navigate } from "react-router-dom";
+// import { Navigate } from "react-router-dom";
+import emailjs from "emailjs-com"; // Import EmailJS
 
 const CartPage = () => {
   const cartItems = useSelector((state) => state.cart);
@@ -30,8 +32,6 @@ const CartPage = () => {
     dispatch(decrementQuantity(id));
   };
 
-  // const cartQuantity = cartItems.length;
-
   const cartItemTotal = cartItems
     .map((item) => item.quantity)
     .reduce((prevValue, currValue) => prevValue + currValue, 0);
@@ -44,7 +44,7 @@ const CartPage = () => {
     localStorage.setItem("cart", JSON.stringify(cartItems));
   }, [cartItems]);
 
-  // user
+  // User info
   const user = JSON.parse(localStorage.getItem("users"));
 
   // Buy Now Function
@@ -62,7 +62,7 @@ const CartPage = () => {
   });
 
   const buyNowFunction = () => {
-    // validation
+    // Validation
     if (
       addressInfo.name === "" ||
       addressInfo.address === "" ||
@@ -86,18 +86,55 @@ const CartPage = () => {
         year: "numeric",
       }),
     };
+
     try {
       const orderRef = collection(fireDB, "order");
       addDoc(orderRef, orderInfo);
+
+      // Send Confirmation Email
+      const emailData = {
+        user_name: addressInfo.name,
+        user_email: user.email,
+        order_id: `ORD-${new Date().getTime()}`, // Generate unique order ID
+        order_date: orderInfo.date,
+        total_amount: `$${cartTotal}`,
+      };
+
+      emailjs
+        .send(
+          "service_xun613c", // Replace with your EmailJS Service ID
+          "template_7t7d09l", // Replace with your EmailJS Template ID
+          emailData,
+          "3SNeUGDiNbpTciyjZ" // Replace with your EmailJS Public Key
+        )
+        .then(
+          (response) => {
+            console.log(
+              "Email sent successfully!",
+              response.status,
+              response.text
+            );
+            toast.success("Order Confirmation Email Sent");
+          },
+          (error) => {
+            console.error("Failed to send email.", error);
+            toast.error("Failed to send confirmation email");
+          }
+        );
+
+      // Clear cart after placing order
+      dispatch(clearCart());
+
       setAddressInfo({
         name: "",
         address: "",
         pincode: "",
         mobileNumber: "",
       });
-      toast.success("Order Placed Successfull");
+      toast.success("Order Placed Successfully");
     } catch (error) {
-      console.log(error);
+      console.error("Error placing order:", error);
+      toast.error("Order placement failed");
     }
   };
 
@@ -118,97 +155,93 @@ const CartPage = () => {
               </h2>
               <ul role="list" className="divide-y divide-gray-200">
                 {cartItems.length > 0 ? (
-                  <>
-                    {cartItems.map((item, index) => {
-                      const {
-                        id,
-                        title,
-                        price,
-                        productImageUrl,
-                        quantity,
-                        category,
-                      } = item;
-                      return (
-                        <div key={index} className="">
-                          <li className="flex py-6 sm:py-6 ">
-                            <div className="flex-shrink-0">
-                              <img
-                                src={productImageUrl}
-                                alt="img"
-                                className="sm:h-38 sm:w-38 h-24 w-24 rounded-md object-contain object-center"
-                              />
-                            </div>
-
-                            <div className="ml-4 flex flex-1 flex-col justify-between sm:ml-6">
-                              <div className="relative pr-9 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:pr-0">
-                                <div>
-                                  <div className="flex justify-between">
-                                    <h3 className="text-sm">
-                                      <div className="font-semibold text-black">
-                                        {title}
-                                      </div>
-                                    </h3>
-                                  </div>
-                                  <div className="mt-1 flex text-sm">
-                                    <p className="text-sm text-gray-500">
-                                      {category}
-                                    </p>
-                                  </div>
-                                  <div className="mt-1 flex items-end">
-                                    <p className="text-sm font-medium text-gray-900">
-                                      ${price}
-                                    </p>
-                                  </div>
+                  cartItems.map((item, index) => {
+                    const {
+                      id,
+                      title,
+                      price,
+                      productImageUrl,
+                      quantity,
+                      category,
+                    } = item;
+                    return (
+                      <div key={index} className="">
+                        <li className="flex py-6 sm:py-6 ">
+                          <div className="flex-shrink-0">
+                            <img
+                              src={productImageUrl}
+                              alt="img"
+                              className="sm:h-38 sm:w-38 h-24 w-24 rounded-md object-contain object-center"
+                            />
+                          </div>
+                          <div className="ml-4 flex flex-1 flex-col justify-between sm:ml-6">
+                            <div className="relative pr-9 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:pr-0">
+                              <div>
+                                <div className="flex justify-between">
+                                  <h3 className="text-sm">
+                                    <div className="font-semibold text-black">
+                                      {title}
+                                    </div>
+                                  </h3>
+                                </div>
+                                <div className="mt-1 flex text-sm">
+                                  <p className="text-sm text-gray-500">
+                                    {category}
+                                  </p>
+                                </div>
+                                <div className="mt-1 flex items-end">
+                                  <p className="text-sm font-medium text-gray-900">
+                                    ${price}
+                                  </p>
                                 </div>
                               </div>
                             </div>
-                          </li>
-                          <div className="mb-2 flex">
-                            <div className="min-w-24 flex">
-                              <button
-                                onClick={() => handleDecrement(id)}
-                                type="button"
-                                className="h-7 w-7"
-                              >
-                                -
-                              </button>
-                              <input
-                                type="text"
-                                className="mx-1 h-7 w-9 rounded-md border text-center"
-                                value={quantity}
-                                readOnly
-                              />
-                              <button
-                                onClick={() => handleIncrement(id)}
-                                type="button"
-                                className="flex h-7 w-7 items-center justify-center"
-                              >
-                                +
-                              </button>
-                            </div>
-                            <div className="ml-6 flex text-sm">
-                              <button
-                                onClick={() => deleteCart(item)}
-                                type="button"
-                                className="flex items-center space-x-1 px-2 py-1 pl-0"
-                              >
-                                <Trash size={12} className="text-red-500" />
-                                <span className="text-xs font-medium text-red-500">
-                                  Remove
-                                </span>
-                              </button>
-                            </div>
+                          </div>
+                        </li>
+                        <div className="mb-2 flex">
+                          <div className="min-w-24 flex">
+                            <button
+                              onClick={() => handleDecrement(id)}
+                              type="button"
+                              className="h-7 w-7"
+                            >
+                              -
+                            </button>
+                            <input
+                              type="text"
+                              className="mx-1 h-7 w-9 rounded-md border text-center"
+                              value={quantity}
+                              readOnly
+                            />
+                            <button
+                              onClick={() => handleIncrement(id)}
+                              type="button"
+                              className="flex h-7 w-7 items-center justify-center"
+                            >
+                              +
+                            </button>
+                          </div>
+                          <div className="ml-6 flex text-sm">
+                            <button
+                              onClick={() => deleteCart(item)}
+                              type="button"
+                              className="flex items-center space-x-1 px-2 py-1 pl-0"
+                            >
+                              <Trash size={12} className="text-red-500" />
+                              <span className="text-xs font-medium text-red-500">
+                                Remove
+                              </span>
+                            </button>
                           </div>
                         </div>
-                      );
-                    })}
-                  </>
+                      </div>
+                    );
+                  })
                 ) : (
                   <h1>Cart is empty</h1>
                 )}
               </ul>
             </section>
-            {/* Order summary */}
             <section
               aria-labelledby="summary-heading"
               className="mt-16 rounded-md bg-white lg:col-span-4 lg:mt-0 lg:p-0"
@@ -220,7 +253,7 @@ const CartPage = () => {
                 Price Details
               </h2>
               <div>
-                <dl className=" space-y-1 px-2 py-4">
+                <dl className="space-y-1 px-2 py-4">
                   <div className="flex items-center justify-between">
                     <dt className="text-sm text-gray-800">
                       Price ({cartItemTotal} item)
@@ -244,18 +277,20 @@ const CartPage = () => {
                     </dd>
                   </div>
                 </dl>
-                <div className="px-2 pb-4 font-medium text-green-700">
-                  <div className="flex gap-4 mb-6">
-                    {user ? (
-                      <BuyNowModal
-                        addressInfo={addressInfo}
-                        setAddressInfo={setAddressInfo}
-                        buyNowFunction={buyNowFunction}
-                      />
-                    ) : (
-                      <Navigate to={"/login"} />
-                    )}
+                {/* <div className="px-2 pb-4 font-medium text-green-700">
+                  <div className="flex">
+                    <p className="text-sm">
+                      Your Total Savings on this order $ {cartTotal}*
+                    </p>
                   </div>
+                </div> */}
+                <div>
+                  <BuyNowModal
+                    buyNowFunction={buyNowFunction}
+                    addressInfo={addressInfo}
+                    setAddressInfo={setAddressInfo}
+                    cartItems={cartItems}
+                  />
                 </div>
               </div>
             </section>
